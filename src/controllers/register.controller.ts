@@ -5,7 +5,10 @@ import User from "../models/User.model";
 import bcrypt from "bcrypt"
 
 const saltRounds = 10
-const randomOTP = Math.floor(Math.random()*6)
+export function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 
 
 export const registerController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -47,7 +50,7 @@ export const registerController = async (req: Request, res: Response, next: Next
                     isVerified: false,
                     role,
                 })
-                await sendOtp(email,name,randomOTP)
+                await sendOtp(email,name,generateOTP())
                 res.status(201).send({ message: "Created successfully, check your mail for an OTP" })
             } catch (error: any | unknown) {
                 throw new Error(error)

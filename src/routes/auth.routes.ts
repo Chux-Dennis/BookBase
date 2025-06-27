@@ -6,4 +6,8 @@ const AuthRoutes = Router()
 
 AuthRoutes.post("/register",registerController)
 
+AuthRoutes.post("/otp-confirm",registerController)
+
+
+
 export default AuthRoutes
