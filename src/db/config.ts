@@ -5,6 +5,7 @@ dotenv.config()
 
 const { DB_NAME, DB_PASSWORD, DB_USERNAME } = process.env
 
+// console.log( DB_NAME, DB_PASSWORD, DB_USERNAME);
 
 
 const SequelizeConfig = new SQL(DB_NAME as string, DB_USERNAME as string, DB_PASSWORD as string, {

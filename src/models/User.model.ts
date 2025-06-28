@@ -28,6 +28,14 @@ const User = SequelizeConfig.define("user", {
         type: DataTypes.BIGINT,
         defaultValue: false
     },
+    otp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    otpExpires: {
+        type: DataTypes.DATE,
+        allowNull: true,
+    },
     role: {
         type: DataTypes.ENUM("Admin", "Librarian", "Reader"),
         defaultValue: "Reader",
