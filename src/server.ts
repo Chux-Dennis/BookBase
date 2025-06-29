@@ -2,7 +2,9 @@ import express from "express"
 import SequelizeConfig from "./db/config"
 const app = express()
 import AuthRoutes from "./routes/auth.routes"
+import BookRoutes from "./routes/book.routes"
 import { errorHandler } from "./middleware/errorHandler"
+import "./models/index"
 const PORT: number = 3001
 
 //Middleware to allow express to accept payloads
@@ -13,6 +15,9 @@ app.use(errorHandler)
 
 // Auth Routes 
 app.use('/auth',AuthRoutes)
+
+//Book Routes
+app.use("/books",BookRoutes)
 
 
 SequelizeConfig.sync().then(() => {

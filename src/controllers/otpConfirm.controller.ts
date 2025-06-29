@@ -1,66 +1,57 @@
 import { NextFunction, Request, Response } from "express";
+import { Model } from "sequelize";
 import User from "../models/User.model";
+import { UserInstance } from "../models/User.model.interface";
 import { validateOTP } from "../validations/confirmOTP.validate";
-import jwt from "jsonwebtoken"
 
-export const confirmOTP = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    if (!req.body || req.body == undefined || req.body == null || Object.keys(req.body).length == 0) {
-        res.status(400).send({ message: "No payload passed." })
-        return
+export const confirmOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<any> => {
+  // Validate request body
+  const { error } = validateOTP.validate(req.body);
+  if (error) {
+    return res.status(400).json({ success: false, message: error.details[0].message });
+  }
+
+  const { email, otp } = req.body;
+
+  try {
+    // Find user with specific attributes
+    const existingUser = await User.findOne({
+      where: { email },
+    }) as UserInstance | null;
+
+    if (!existingUser) {
+      return res.status(400).json({ success: false, message: "Email does not exist" });
     }
 
-    const { email, otp } = req.body
-
-
-    try {
-        //Check if email is valid
-        const existingUser = await User.findOne({ where: { email: email } })
-
-        if (!existingUser) {
-            res.status(400).send({ message: "Email does not exist" })
-            return
-        }
-
-        // Check if user is already verified 
-        if (existingUser.dataValues.isVerified) {
-            res.status(400).send({ message: "User is verified already" })
-            return
-        }
-
-        // Check if otp is valid  
-        if (existingUser.dataValues.otp === otp) {
-
-            // Check if otp has expired
-            if (new Date() < existingUser.dataValues.otp) {
-                res.status(400).send({ message: "OTP has expired" })
-                return
-            }
-
-            else {
-                existingUser.dataValues.isVerified = true
-                existingUser.dataValues.otpExpires = null
-                existingUser.dataValues.otp = null
-
-               await existingUser.save()
-
-                res.status(200).send({
-                    message: "OTP Confirmed Successfully."
-                })
-                return
-            }
-
-
-
-
-        } else {
-            console.log(existingUser.dataValues.otp, otp);
-            res.status(400).send({ message: "OTP provided is invalid" })
-            return
-        }
-
-
-    } catch (error: any | unknown) {
-        throw new Error(error)
+    if (existingUser.isVerified) {
+      return res.status(400).json({ success: false, message: "User is already verified" });
     }
 
-}
+    if (existingUser.otpExpires && new Date() > existingUser.otpExpires) {
+      return res.status(400).json({ success: false, message: "OTP has expired" });
+    }
+
+    // Assuming OTP is stored as plain text (consider hashing in production)
+    if (existingUser.otp !== otp) {
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
+    }
+
+    // Update user
+    existingUser.isVerified = true;
+    existingUser.otp = null;
+    existingUser.otpExpires = null;
+    await existingUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP confirmed successfully",
+      data: { email: existingUser.email },
+    });
+  } catch (error: any) {
+    next(new Error(`Failed to confirm OTP: ${error.message}`));
+  }
+};

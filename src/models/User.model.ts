@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import SequelizeConfig from "../db/config";
-import { defaultValueSchemable, toDefaultValue } from "sequelize/types/utils";
+import { UserAttributes,UserInstance } from "./User.model.interface";
 
-const User = SequelizeConfig.define("user", {
+const User = SequelizeConfig.define<UserInstance>("user", {
     id: {
         type: DataTypes.UUID,
         //   autoIncrement: true,

@@ -1,16 +1,19 @@
-import { NextFunction, Request, Response } from "express"
+import { NextFunction, Request } from "express"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import User from "../models/User.model"
-import { validateLogin } from "../validations/login.validate"
+import { Response } from "express"
+const { JWT_SECRET } = process.env
+import { UserInstance } from "../models/User.model.interface"
 export const loginController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-    if (!req.body || req.body == undefined || req.body == null || Object.keys(req.body).length == 0) {
-        res.status(400).send({ message: "No payload passed." })
-        return
+    if (!req.body || Object.keys(req.body).length === 0) {
+        return res.status(400).json({ success: false, message: "No payload provided" });
     }
+
+
     const { email, password } = req.body
     try {
-        const existingUser = await User.findOne({ where: { email: email } })
+        const existingUser = await User.findOne({ where: { email: email } }) as UserInstance
 
         if (!existingUser) {
             res.status(400).send({ messsage: "User not found." })
@@ -24,14 +27,25 @@ export const loginController = async (req: Request, res: Response, next: NextFun
         }
 
 
-        if (existingUser.dataValues.isVerified) {
+        if (!existingUser.isVerified) {
             res.status(400).send({ messsage: "Unauthorized account." })
             return
         }
 
 
+        existingUser.otp = null
+        existingUser.otpExpires = null
+        existingUser.save()
+
+        const token = jwt.sign({ role: existingUser.role, id: existingUser.id, name: existingUser.name }, JWT_SECRET as jwt.Secret, {
+            expiresIn: "1d"
+        })
+
+        return res.status(200).send({ message: "Login Successful", token: token })
+
+
     } catch (error: any | unknown) {
-        throw new Error(error)
+        next(error)
     }
 
 }
