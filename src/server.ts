@@ -4,6 +4,7 @@ const app = express()
 import AuthRoutes from "./routes/auth.routes"
 import BookRoutes from "./routes/book.routes"
 import { errorHandler } from "./middleware/errorHandler"
+import Borrow from "./routes/borrow.route"
 import "./models/index"
 const PORT: number = 3001
 
@@ -18,6 +19,8 @@ app.use('/auth',AuthRoutes)
 
 //Book Routes
 app.use("/books",BookRoutes)
+
+app.use("/borrow",Borrow)
 
 
 SequelizeConfig.sync().then(() => {

@@ -5,7 +5,7 @@ import { FindByISBN } from "../controllers/findBookByISBN.controller";
 import { FindAllBooks } from "../controllers/findAllBooks.controller";
 import { FindByGenre } from "../controllers/findBookByGenre.controller";
 import { DeleteBook } from "../controllers/deleteBook.controller";
-import { AddBookCopies } from "../controllers/addBookCopies.controller";
+import { AddBookCopies } from "../controllers/manageBookCopies.controller";
 
 const BookRoutes = Router()
 
@@ -25,10 +25,10 @@ BookRoutes.get("/by-isbn", checkRole("Librarian", "Admin"), FindByISBN)
 //Search By Genre
 BookRoutes.get("/by-genre", checkRole("Librarian", "Admin"), FindByGenre)
 
-// Add Number of available copies 
-BookRoutes.post("/add-copies/:id", checkRole("Librarian"), AddBookCopies)
+// Add/Remove Number of available copies 
+BookRoutes.post("/manage-copies/:id", checkRole("Librarian","Admin"), AddBookCopies)
 
-// Delete By Primary Key 
+// Delete Book By Primary Key 
 BookRoutes.delete("/delete/:id", checkRole("Admin"), DeleteBook)
 
 export default BookRoutes

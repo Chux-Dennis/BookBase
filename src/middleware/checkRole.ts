@@ -1,47 +1,70 @@
 import { RoleType } from "../types";
 import jwt from "jsonwebtoken";
-const { JWT_SECRET } = process.env
 import User from "../models/User.model";
 import { Request, Response, NextFunction } from "express";
+
+const { JWT_SECRET } = process.env;
+
 export const checkRole = (...allowedRoles: RoleType[]) => {
-    return async (req: any, res: any, next: any) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authHeader = req.headers.authorization;
 
-        const HeadersAuth: string = req.headers.authorization
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({
+          success: false,
+          message: "No token provided.",
+        });
+        return;
+      }
 
-        if (!HeadersAuth || !HeadersAuth.startsWith("Bearer ")) {
-            return res.status(401).json({
-                success: false,
-                message: "No token provided",
-            });
-        }
+      const token = authHeader.split(" ")[1];
 
-        const token = HeadersAuth.split(" ")[1]
+      const decoded = jwt.verify(token, JWT_SECRET as string) as {
+        id: string;
+        role: string;
+        name: string;
+      };
 
-        try {
-            const decoded = jwt.verify(token, JWT_SECRET as jwt.Secret) as {
-                id: number;
-                role: string;
-                name: string
-            };
-            // console.log(decoded.role in allowedRoles);
-            if (!allowedRoles.includes(decoded.role as RoleType)) {
-                res.status(401).send({ message: "Access Denied!!, Unauthorized Request." })
-                return
-            }
+      const user = await User.findByPk(decoded.id);
 
-            req.user = {
-                id: decoded.id,
-                role: decoded.role as RoleType, // optionally cast to RoleType
-            };
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
 
-            next();
-        } catch (error) {
-            return res.status(401).json({
-                success: false,
-                message: "Invalid or expired token",
-            });
-        }
+      if (!user.isVerified) {
+        res.status(403).json({
+          success: false,
+          message: "User account is not verified",
+        });
+        return;
+      }
 
+      if (!allowedRoles.includes(user.role as RoleType)) {
+        res.status(403).json({
+          success: false,
+          message: "Forbidden: You do not have permission to perform this action",
+        });
+        return;
+      }
 
-    };
+      (req as any).user = {
+        id: user.id as string,
+        role: user.role as RoleType,
+        name: user.name,
+      };
+
+      next();
+    } catch (err) {
+      console.error(err);
+      res.status(401).json({
+        success: false,
+        message: "Invalid or expired token",
+      });
+    }
+  };
 };

@@ -6,6 +6,7 @@ export interface BookInventoryAttributes {
     bookId?: string,
     userId: string,
     transactionType:"entry"|"removal",
+    
     id?:string,
 
 }

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import Book from "../models/Book.model";
 import BookInventory from "../models/BookInventory.model";
 import { validateAddBookCopies } from "../validations/addBookCopies.validate";
+import User from "../models/User.model";
 
 export const AddBookCopies = async (
   req: Request,
@@ -10,14 +11,11 @@ export const AddBookCopies = async (
 ): Promise<any> => {
   try {
     const { id } = req.params;
-    const { amount, userId, transactionType } = req.body;
 
-    if (!amount || !transactionType || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: "amount, transactionType, and userId are required",
-      });
-    }
+
+    const { amount, transactionType } = req.body;
+    let userId = (req as any).user.id;
+   
 
     const { error } = validateAddBookCopies.validate(req.body);
     if (error) {
@@ -31,6 +29,12 @@ export const AddBookCopies = async (
       return res.status(404).json({ success: false, message: "Book not found" });
     }
 
+    const user = await User.findByPk(userId)
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User with ID not found", });
+
+    }
+
     // handle initial stock setup if book is fresh
     if (transactionType === "entry" && book.copiesTotal === 0) {
       book.copiesTotal = amount;
@@ -42,11 +46,12 @@ export const AddBookCopies = async (
         userId,
         transactionType,
         adjustment: amount,
-        comment: `Initial stock added by user ${userId}`,
+        comment: `Initial stock added by user ${user.name}`,
       });
 
       return res.json({
         success: true,
+        user_name: user.name,
         message: `Initial stock of ${amount} copies added successfully.`,
         data: book,
       });
@@ -78,11 +83,12 @@ export const AddBookCopies = async (
       userId,
       transactionType,
       adjustment: Math.abs(amount),
-      comment: `Stock ${transactionType} by user ${userId}`,
+      comment: `Stock ${transactionType} by user ${user.name}`,
     });
 
     return res.json({
       success: true,
+      user_name: user.name,
       message: `Stock ${transactionType} of ${amount} copies applied successfully.`,
       data: book,
     });

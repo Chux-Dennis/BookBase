@@ -38,4 +38,5 @@ BookInventory.sync().then(()=>{
     
 })
 
+
 export default BookInventory
