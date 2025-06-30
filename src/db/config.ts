@@ -10,7 +10,8 @@ const { DB_NAME, DB_PASSWORD, DB_USERNAME } = process.env
 
 const SequelizeConfig = new SQL(DB_NAME as string, DB_USERNAME as string, DB_PASSWORD as string, {
     host: "localhost",
-    dialect:"mysql"
+    dialect:"mysql",
+    logging:false
 })
 
 
