@@ -21,7 +21,7 @@ export const NewBookController = async (req: Request, res: Response, net: NextFu
         publisher } = req.body
 
     if (error) {
-        return res.status(400).json({ success: false, message: error.details[0].message }); return
+        return res.status(400).json({ success: false, message: error.details[0].message });
     }
 
     try {

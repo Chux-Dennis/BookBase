@@ -5,16 +5,11 @@ import User from "../models/User.model";
 import { UserInstance } from "../models/User.model.interface";
 import bcrypt from "bcrypt";
 import generateOtp from "../utils/generateOTP.utils";
+import { getOtpExpiry } from "../utils/otpExpiry.utils";
 
 const saltRounds = 10;
 
-export function getOtpExpiry(): Date {
-    const expiry = new Date();
-    expiry.setMinutes(expiry.getMinutes() + 10);
-    return expiry;
-}
-
-export const registerController = async (
+export const RegisterController = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -46,7 +41,7 @@ export const registerController = async (
         const pwordHash = await bcrypt.hash(password, saltRounds);
         const otp = generateOtp();
         
-        const otpExpires = getOtpExpiry();
+        const otpExpires = getOtpExpiry(10);
 
         // Create user
         const user = await User.create({

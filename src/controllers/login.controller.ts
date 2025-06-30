@@ -5,7 +5,7 @@ import User from "../models/User.model"
 import { Response } from "express"
 const { JWT_SECRET } = process.env
 import { UserInstance } from "../models/User.model.interface"
-export const loginController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+export const LoginController = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ success: false, message: "No payload provided" });
     }

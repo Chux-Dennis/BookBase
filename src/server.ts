@@ -8,6 +8,7 @@ import { errorHandler } from "./middleware/errorHandler"
 import Borrow from "./routes/borrow.route"
 import "./models/index"
 import { startDueDateReminderJob } from "./services/dueDateReminderNotification"
+import Reports from "./routes/reports.routes"
 const PORT: number = 3001
 
 //Middleware to allow express to accept payloads
@@ -24,6 +25,11 @@ app.use("/books",BookRoutes)
 
 //Borrow Routes
 app.use("/borrow",Borrow)
+
+
+//Reports Routes
+app.use("/reports",Reports)
+
 
 // Run Cron Job for reminders 
 startDueDateReminderJob()

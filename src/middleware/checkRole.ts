@@ -60,7 +60,7 @@ export const checkRole = (...allowedRoles: RoleType[]) => {
 
       next();
     } catch (err) {
-      console.error(err);
+      // console.error(err);
       res.status(401).json({
         success: false,
         message: "Invalid or expired token",

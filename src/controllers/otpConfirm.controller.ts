@@ -4,7 +4,7 @@ import User from "../models/User.model";
 import { UserInstance } from "../models/User.model.interface";
 import { validateOTP } from "../validations/confirmOTP.validate";
 
-export const confirmOTP = async (
+export const ConfirmOTP = async (
   req: Request,
   res: Response,
   next: NextFunction

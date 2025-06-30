@@ -34,8 +34,16 @@ export const BorrowBook = async (req: Request, res: Response, next: NextFunction
             res.status(400).send({ message: "Incorrect, put a future date." })
             return
         }
+
+        // Check if book in stock 
+        if (book.copiesAvailable === 0) {
+            res.status(400).send({ message: "Book is not currently in stock" })
+            return
+        }
         //Check if the same book book has been borrowed already
-        const foundBook = await BorrowRecord.findOne({ where: { bookId: id, userId: userId } })
+        const foundBook = await BorrowRecord.findOne({ where: { bookId: id, userId: userId, status: "active" } })
+
+
 
         if (foundBook) {
             res.status(400).send({ message: "Book has already been borrowed." })
@@ -49,6 +57,11 @@ export const BorrowBook = async (req: Request, res: Response, next: NextFunction
             status: "active",
             userId,
         })
+
+        // Update available copies (decrease by one)
+        book.copiesAvailable -= 1;
+        await book.save();
+
 
 
         await newBorrowEntry.save()

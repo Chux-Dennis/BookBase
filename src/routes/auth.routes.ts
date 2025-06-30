@@ -1,15 +1,21 @@
 import { Router } from "express";
-import { registerController } from "../controllers/register.controller";
-import { confirmOTP } from "../controllers/otpConfirm.controller";
-import { loginController } from "../controllers/login.controller";
-
+import { RegisterController } from "../controllers/register.controller";
+import { ConfirmOTP } from "../controllers/otpConfirm.controller";
+import { LoginController } from "../controllers/login.controller";
+import { ForgotPassword } from "../controllers/forgotPassword.controller";
+import { ResetPassword } from "../controllers/resetPassword.controller";
 
 const AuthRoutes = Router()
 
-AuthRoutes.post("/register",registerController)
+AuthRoutes.post("/register",RegisterController)
 
-AuthRoutes.post("/otp-confirm",confirmOTP)
+AuthRoutes.post("/otp-confirm",ConfirmOTP)
 
-AuthRoutes.post("/login",loginController)
+AuthRoutes.post("/login",LoginController)
+
+AuthRoutes.post("/forgot-password",ForgotPassword)
+
+AuthRoutes.post("/reset-password",ResetPassword)
+
 
 export default AuthRoutes
